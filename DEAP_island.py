@@ -30,7 +30,7 @@ class Expression_data:
         expression_data["Phylostratum"] = Expression_data.quantilerank(expression_data["Phylostratum"])
         self.full = expression_data
         exps = expression_data.iloc[:, 2:]
-        #sexps = exps.applymap(lambda x: np.sqrt(x))
+        exps = exps.applymap(lambda x: np.log(x + 1))
         self.age_weighted = exps.mul(expression_data["Phylostratum"], axis=0).to_numpy()
         self.expressions_n = exps.to_numpy()
         self.expressions = exps
