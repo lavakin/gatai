@@ -1,0 +1,6 @@
+[submodule "d"]
+	path = d
+	url = git@github.com:lavakin/SetMiGA.git
+[submodule "SetMiG"]
+	path = SetMiG
+	url = git@github.com:lavakin/SetMiGA.git
