@@ -30,7 +30,7 @@ chmod +x DEAP_island.py
 ## Usage
 
 ```
-./DEAP_island.py data output_folder --save_plot
+./DEAP_island.py data.csv output_folder --save_plot
 ```
 
 
