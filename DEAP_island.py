@@ -7,6 +7,7 @@ from SetMiG import GA_utils
 import hourglass_utils
 import argparse
 import os
+import time
 
 parser = argparse.ArgumentParser()
     
@@ -30,7 +31,8 @@ class Expression_data:
         expression_data["Phylostratum"] = Expression_data.quantilerank(expression_data["Phylostratum"])
         self.full = expression_data
         exps = expression_data.iloc[:, 2:]
-        exps = exps.applymap(lambda x: np.log(x + 1))
+        #exps = exps.applymap(lambda x: np.sqrt(x))
+        #exps = exps.applymap(lambda x: np.log(x + 1))
         self.age_weighted = exps.mul(expression_data["Phylostratum"], axis=0).to_numpy()
         self.expressions_n = exps.to_numpy()
         self.expressions = exps
@@ -79,7 +81,7 @@ def evaluate_individual(individual,permuts,expression_data):
         p = np.count_nonzero(permuts < res)/len(permuts)
         r = (res) / (max_value)
         r = r + p
-        return r if p > 0.2 else 0
+        return r if p > 0.1 else 0
     sol = np.array(individual)
     distance = np.var(np.divide(sol.dot(expression_data.age_weighted),sol.dot(expression_data.expressions_n)))
     fit = get_fit(distance)
@@ -88,7 +90,7 @@ def evaluate_individual(individual,permuts,expression_data):
 
 mut  = 0.001
 cross = 0.02
-
+tic = time.perf_counter()
 pop,pareto_front = GA_select.run_minimizer(expression_data.full.shape[0],evaluate_individual,1,["Variance"], 
                   eval_func_kwargs={"permuts": permuts, "expression_data": expression_data},
                   mutation_rate = 0.001,crossover_rate = 0.02, 
@@ -96,7 +98,7 @@ pop,pareto_front = GA_select.run_minimizer(expression_data.full.shape[0],evaluat
                   crossover =  "uniform_partialy_matched",
                   selection = "SPEA2",frac_init_not_removed = 0.005)
 
-
+toc = time.perf_counter()
 if not os.path.exists(args.output):
     os.makedirs(args.output)
 np.savetxt(os.path.join(args.output,"complete.csv"), np.array(pop), delimiter="\t")
@@ -110,6 +112,14 @@ np.savetxt(os.path.join(args.output,"pareto.csv"), par, delimiter="\t")
 
 
 if args.save_plot:
-    GA_utils.plot_pareto(ress,parr,args.output)
-GA_utils.get_results(pop,ress,args.output,expression_data.full.GeneID)
+    plot = GA_utils.plot_pareto(ress,parr,args.output)
+    plot.savefig(os.path.join(args.output, "pareto_front.png")) 
+genes = GA_utils.get_results(pop,ress,args.output,expression_data.full.GeneID)
+np.savetxt(os.path.join(args.output,"extracted_genes.txt"),genes, fmt="%s")
 
+with open(os.path.join(args.output, "summary.txt"), 'w') as file:
+    # Write the first line
+    file.write(f'Time: {toc - tic:0.4f} seconds\n')
+    
+    # Write the second line
+    file.write(f'Number of genes: {len(genes)}\n')
