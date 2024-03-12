@@ -2,8 +2,8 @@
 import numpy as np
 import scipy
 import pandas as pd
-from SetMiG import GA_select
-from SetMiG import GA_utils
+from SetMiGA import GA_select
+from SetMiGA import GA_utils
 import hourglass_utils
 import argparse
 import os
