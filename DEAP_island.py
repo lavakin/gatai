@@ -2,8 +2,8 @@
 import numpy as np
 import scipy
 import pandas as pd
-from SetMiGA import GA_select
-from SetMiGA import GA_utils
+from SetMiGA import select
+from SetMiGA import utils
 import hourglass_utils
 import argparse
 import os
@@ -91,7 +91,7 @@ def evaluate_individual(individual,permuts,expression_data):
 mut  = 0.001
 cross = 0.02
 tic = time.perf_counter()
-pop,pareto_front = GA_select.run_minimizer(expression_data.full.shape[0],evaluate_individual,1,["Variance"], 
+pop,pareto_front = select.run_minimizer(expression_data.full.shape[0],evaluate_individual,1,["Variance"], 
                   eval_func_kwargs={"permuts": permuts, "expression_data": expression_data},
                   mutation_rate = 0.001,crossover_rate = 0.02, 
                   pop_size = 150, num_gen = num_generations, num_islands = 8, mutation = "bit_flip" , 
@@ -112,9 +112,9 @@ np.savetxt(os.path.join(args.output,"pareto.csv"), par, delimiter="\t")
 
 
 if args.save_plot:
-    plot = GA_utils.plot_pareto(ress,parr,args.output)
+    plot = utils.plot_pareto(ress,parr,args.output)
     plot.savefig(os.path.join(args.output, "pareto_front.png")) 
-genes = GA_utils.get_results(pop,ress,args.output,expression_data.full.GeneID)
+genes = utils.get_results(pop,ress,args.output,expression_data.full.GeneID)
 np.savetxt(os.path.join(args.output,"extracted_genes.txt"),genes, fmt="%s")
 
 with open(os.path.join(args.output, "summary.txt"), 'w') as file:
