@@ -4,7 +4,7 @@ import scipy
 import pandas as pd
 from setminga import select
 from setminga import utils
-from trapga import utils
+from trapga import utils as hg_utils
 import argparse
 import os
 import time
@@ -42,7 +42,7 @@ expression_data = Expression_data(arr)
 if args.variances:
     permuts = np.loadtxt(args.permuts)
 else:
-    permuts = utils.comp_vars(expression_data,100000)
+    permuts = hg_utils.comp_vars(expression_data,100000)
 
 ind_length = expression_data.full.shape[0]
 
