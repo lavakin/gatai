@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='trapga',
-    version='0.1',
+    version='0.2',
     py_modules=['trapga'],
     #packages = ['trapga'],
     license='MIT',   
@@ -10,7 +10,7 @@ setup(
     author = 'Nikola Kalábová',              
     author_email = 'nikola@kalabova.eu',     
     url = 'https://github.com/lavakin/trapga',  
-    download_url = 'https://github.com/lavakin/trapga/archive/refs/tags/v0.1.tar.gz',    
+    download_url = 'https://github.com/lavakin/trapga/archive/refs/tags/v0.2.tar.gz',    
     keywords = ['Genetic algorithms', 'minimal subset', 'multi-objective', "optimization"],   
     install_requires=['numpy', 'scipy', 'pandas', 'argparse', 'scikit-learn', 'tqdm',"setminga"],
     entry_points={
