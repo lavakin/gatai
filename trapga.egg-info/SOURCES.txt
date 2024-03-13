@@ -1,0 +1,9 @@
+README.md
+setup.py
+trapga.py
+trapga.egg-info/PKG-INFO
+trapga.egg-info/SOURCES.txt
+trapga.egg-info/dependency_links.txt
+trapga.egg-info/entry_points.txt
+trapga.egg-info/requires.txt
+trapga.egg-info/top_level.txt

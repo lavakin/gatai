@@ -2,8 +2,8 @@
 import numpy as np
 import scipy
 import pandas as pd
-from SetMiGA import select
-from SetMiGA import utils
+from setminga import select
+from setminga import utils
 import hourglass_utils
 import argparse
 import os
@@ -14,8 +14,7 @@ parser = argparse.ArgumentParser()
 # Add arguments for input and output files
 parser.add_argument("input", type=str, help="Input file path")
 parser.add_argument("output", type=str, help="Output file path")
-parser.add_argument("--permuts", type=str, help="Permutation file", nargs='?')
-parser.add_argument("--organ", type=str, help="Organ", nargs='?')
+parser.add_argument("--variances", type=str, help="Precomputed variances stored as numbers in one line of a file", nargs='?')
 parser.add_argument("--save_plot", action="store_true", help="Save pareto plot")
 #parser.add_argument("--save_pareto", action="store_true", help="Save Pareto front")
 args = parser.parse_args()
@@ -42,12 +41,12 @@ arr = pd.read_csv(args.input,
                  delimiter="\t")
 expression_data = Expression_data(arr)
 permuts = hourglass_utils.comp_vars(expression_data,100000)
-#permuts = np.loadtxt(args.permuts)
+permuts = np.loadtxt(args.permuts)
 ind_length = expression_data.full.shape[0]
 
 population_size = 150
 #parents_ratio = 0.2
-num_generations = 6000
+num_generations = 8000
 init_num_removed = 150
 num_islands = 6
 
