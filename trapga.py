@@ -14,9 +14,8 @@ parser = argparse.ArgumentParser()
 # Add arguments for input and output files
 parser.add_argument("input", type=str, help="Input file path")
 parser.add_argument("output", type=str, help="Output file path")
-parser.add_argument("--variances", type=str, help="Precomputed variances stored as numbers in one line of a file", nargs='?')
+parser.add_argument("--variances", type=str, help="Precomputed variances file stored as numbers in one line of", nargs='?')
 parser.add_argument("--save_plot", action="store_true", help="Save pareto plot")
-#parser.add_argument("--save_pareto", action="store_true", help="Save Pareto front")
 args = parser.parse_args()
 
 class Expression_data:
@@ -40,8 +39,11 @@ class Expression_data:
 arr = pd.read_csv(args.input,
                  delimiter="\t")
 expression_data = Expression_data(arr)
-permuts = hourglass_utils.comp_vars(expression_data,100000)
-permuts = np.loadtxt(args.permuts)
+if args.variances:
+    permuts = np.loadtxt(args.permuts)
+else:
+    permuts = hourglass_utils.comp_vars(expression_data,100000)
+
 ind_length = expression_data.full.shape[0]
 
 population_size = 150
