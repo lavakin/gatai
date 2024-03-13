@@ -1,9 +1,9 @@
 Metadata-Version: 2.1
 Name: trapga
-Version: 0.2
+Version: 0.3
 Summary: Library designed for extracting genes that play a significant role in development. It utilizes transcriptomic data of genes, spanning multiple developmental stages and their respective gene ages
 Home-page: https://github.com/lavakin/trapga
-Download-URL: https://github.com/lavakin/trapga/archive/refs/tags/v0.2.tar.gz
+Download-URL: https://github.com/lavakin/trapga/archive/refs/tags/v0.3.tar.gz
 Author: Nikola Kalábová
 Author-email: nikola@kalabova.eu
 License: MIT

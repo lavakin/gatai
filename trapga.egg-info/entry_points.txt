@@ -1,2 +1,2 @@
 [console_scripts]
-trapga = trapga:cli
+trapga = trapga.trapga:cli

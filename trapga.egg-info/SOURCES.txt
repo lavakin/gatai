@@ -1,6 +1,7 @@
 README.md
 setup.py
-trapga.py
+trapga/trapga.py
+trapga/utils.py
 trapga.egg-info/PKG-INFO
 trapga.egg-info/SOURCES.txt
 trapga.egg-info/dependency_links.txt
