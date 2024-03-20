@@ -1,6 +1,8 @@
-# TraP-GA 
+TraP-GA 
+=============
 
-## Overview
+Overview
+-------------------
 
 The TraP-GA is a Python library built upon SetMiG, designed for extracting genes that play a significant role in development. It utilizes transcriptomic data of genes, spanning multiple developmental stages and their respective gene ages (for more information on how to get the gene ages, see [GeneEra](https://github.com/josuebarrera/GenEra)).
 
@@ -14,28 +16,41 @@ Additionally, to enhance its search capability and avoid being trapped in local 
 
 https://github.com/lavakin/ga_for_hourglass/assets/76702901/5435d04b-151b-46da-b179-d48ca9a7e5ce
 
-## Features
+Features
+-------------------
 
 - **Gene Extraction:** Automatically identifies and extracts genes significant to development from transcriptomic data.
 - **Built on SetMiG:** Leveraging the capabilities of SetMiG, a library for extracting a minimal subset which optimizes a given function.
 
-## Installation
-```
-git clone https://github.com/lavakin/TraP-GA
-chmod +x DEAP_island.py
-```
-## Usage
+Installation
+-------------------
 
-```
-./DEAP_island.py data.csv output_folder --save_plot
-```
+.. code-block:: bash
+
+  git clone https://github.com/lavakin/TraP-GA
+
+.. code-block:: bash
+
+  chmod +x DEAP_island.py
 
 
-## Contributing
+Usage
+-------------------
+
+.. code-block:: bash
+
+   ./DEAP_island.py data.csv output_folder --save_plot
+
+
+
+
+Contributing
+-------------------
 
 Contributions to this project are welcome. If you have any ideas for improvements, new features, or bug fixes, please submit a pull request. For major changes, please open an issue to discuss the proposed modifications.
 
 
-## License
+License
+-------------------
 
 This project is licensed under the MIT License. Feel free to use and modify the code according to the terms of this license.
