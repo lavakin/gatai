@@ -1,0 +1,18 @@
+version: "1.4"
+
+build:
+  os: "mac os"
+  tools:
+    python: "3.12"
+
+python:
+  install:
+    - requirements: docs/requirements.txt
+
+sphinx:
+  configuration: docs/source/conf.py
+  fail_on_warning: true
+
+formats:
+  - pdf
+  - epub
