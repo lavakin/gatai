@@ -10,3 +10,10 @@ License: MIT
 Keywords: Genetic algorithms,minimal subset,multi-objective,optimization
 Classifier: Development Status :: 3 - Alpha
 Classifier: License :: OSI Approved :: MIT License
+Requires-Dist: numpy
+Requires-Dist: scipy
+Requires-Dist: pandas
+Requires-Dist: argparse
+Requires-Dist: scikit-learn
+Requires-Dist: tqdm
+Requires-Dist: setminga

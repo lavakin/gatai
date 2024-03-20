@@ -6,7 +6,7 @@ setup(
     py_modules=['trapga'],
     packages = ['trapga'],
     license='MIT',   
-    description = 'Library designed for extracting genes that play a significant role in development. It utilizes transcriptomic data of genes, spanning multiple developmental stages and their respective gene ages',   # Give a short description about your library
+    description = 'Library designed for extracting genes that play a significant role in development. It utilizes transcriptomic data of genes, spanning multiple developmental stages and their respective gene ages',  # Give a short description about your library
     author = 'Nikola Kalábová',              
     author_email = 'nikola@kalabova.eu',     
     url = 'https://github.com/lavakin/trapga',  
@@ -23,4 +23,3 @@ setup(
         'License :: OSI Approved :: MIT License',  
     ] 
 )
-
