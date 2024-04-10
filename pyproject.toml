@@ -1,8 +1,0 @@
-[build-system]
-requires = ["flit_core >=3.2,<4"]
-build-backend = "flit_core.buildapi"
-
-[project]
-name = "trapga"
-authors = [{name = "Nikola Kalábová", email = "nikola@kalabova.eu"}]
-dynamic = ["v1.4", "Package to identify genes thay play a significant role in (developmental) patterns"]

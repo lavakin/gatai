@@ -1,6 +1,3 @@
-import os
-import sys
-
 # Configuration file for the Sphinx documentation builder.
 #
 # For the full list of built-in configuration values, see the documentation:
@@ -12,12 +9,11 @@ import sys
 project = 'trapga'
 copyright = '2024, Nikola Kalábová'
 author = 'Nikola Kalábová'
-release = '1.3.'
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
-extensions = []
+extensions = ['sphinx.ext.autodoc',]
 
 templates_path = ['_templates']
 exclude_patterns = []
@@ -30,7 +26,7 @@ exclude_patterns = []
 html_theme = 'alabaster'
 html_static_path = ['_static']
 
-# paths from conf.py
+import os
+import sys
 sys.path.insert(0, os.path.abspath('../../trapga/'))
-sys.path.insert(0, os.path.abspath('../../'))
-sys.path.insert(0, os.path.abspath('../'))
+

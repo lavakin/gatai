@@ -337,7 +337,7 @@ def get_fastas(args):
     filtered_records = []
     with open(args.fastas, "r") as fasta_file:
         for record in SeqIO.parse(fasta_file, "fasta"):
-            if record.id in genes:
+            if any(record.id.startswith(gene) for gene in genes):
                 filtered_records.append(record)
 
     with open(os.path.join(args.output,"extracted_fastas.fasta"), "w") as output_file:

@@ -1,4 +1,4 @@
-README.md
+README.rst
 setup.py
 trapga/trapga.py
 trapga/utils.py

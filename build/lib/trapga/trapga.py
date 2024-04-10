@@ -43,7 +43,11 @@ elif args.command == "get_fastas":
     hg_utils.get_fastas(args)
 
 def cli():
+    """just some mandatory thing for it to work
+    """
     pass
 
 if __name__ == '__main__':
+    """main
+    """
     cli()

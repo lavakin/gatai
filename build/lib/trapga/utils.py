@@ -12,6 +12,15 @@ from setminga import utils, select
 from Bio import SeqIO
 
 def comp_vars(expression_data,rounds):
+    """Computes the min-variances of a TAI patterns for permuted phylostrata
+
+    :param expression_data: expression data
+    :type expression_data: pd.DataFrame
+    :param rounds: number of permutations of phylostrata
+    :type rounds: int
+    :return: variances for the TAI patterns, used to determine the empirical p-value
+    :rtype: np.array
+    """
     avgs = []
     phil = expression_data.full["Phylostratum"]
     print("Running permuations")
@@ -23,6 +32,15 @@ def comp_vars(expression_data,rounds):
     return np.var(avgs, axis=1)
 
 def comp_min_max(expression_data,rounds):
+    """Computes the min-max value of a TAI patterns for permuted phylostrata
+
+    :param expression_data: expression data
+    :type expression_data: pd.DataFrame
+    :param rounds: number of permutations of phylostrata
+    :type rounds: int
+    :return: min-max values for the TAI patterns, used to determine the empirical p-value
+    :rtype: np.array
+    """
     avgs = []
     phil = expression_data.full["Phylostratum"]
     print("Running permuations")
@@ -35,17 +53,36 @@ def comp_min_max(expression_data,rounds):
 
 
 def extract_similar(args):
+    """identified genes, that have similar expression patterns to the extracted ones and generates a file that includes those and the genes identified by the minimizer
+
+    :param args: gets args from the main cli script
+    :type args: argparse.Namespace
+    :return: saves the similar genes and the originally identified genes into a file
+    :rtype: None
+    """
     genes = np.array([line.strip() for line in open(args.genes, 'r')])
     arr = pd.read_csv(args.input, delimiter="\t")
 
     def remove_one_type_clusters(clusters):
-        def same_type_community(community):
-            types = set(["ext" if x in genes else "edg" for x in community])
+        """removes clusters with just one type of genes (extracted/not extracted) 
+
+        :param clusters: set of co-clustered genes
+        :type clusters: list
+        """
+        def same_type_clusters(clusters):
+            """tests if there is just one type of genes (extracted/not extracted) in the set
+
+            :param clusters: set of co-clustered genes
+            :type clusters: list
+            :return: True if there is just one type of genes
+            :rtype: bool
+            """
+            types = set(["ext" if x in genes else "edg" for x in clusters])
             return len(types) == 1
 
         valid_clusts = []      
         for clust in clusters:
-            if not same_type_community(clust):
+            if not same_type_clusters(clust):
                 valid_clusts.append(clust)
         return valid_clusts
     
@@ -72,7 +109,19 @@ def extract_similar(args):
             correlation_threshold = 0.95
 
             def is_close(value, target_value, threshold):
+                """returns if a value is close to a trashold value by a given threshold
+
+                :param value: given value
+                :type value: float
+                :param target_value: target value
+                :type target_value: float
+                :param threshold: tolerance threshold
+                :type threshold: fload
+                :return: true if a value is close to a trashold value by a given threshold
+                :rtype: bool
+                """
                 return abs(value - target_value) <= threshold
+            
             for id_to_check in cluster:
                 target_phylostratum = clust.loc[clust.index == id_to_check, 'Phylostratum'].iloc[0]
                 close_phylostratum_rows = clust[clust.index.isin(ex_genes) & clust['Phylostratum'].apply(lambda x: is_close(x, target_phylostratum, phylostratum_threshold))]
@@ -90,6 +139,11 @@ def extract_similar(args):
 
 
 def extract_coexpressed(args):
+    """Finds all genes, that are co-expressed with the identified set and saves them in a file
+
+    :param args: gets args from the main cli script
+    :type args: argparse.Namespace
+    """
     genes = np.array([line.strip() for line in open(args.genes, 'r')])
     arr = pd.read_csv(args.input, delimiter="\t")
     pearson_threshold = 30
@@ -120,14 +174,34 @@ def extract_coexpressed(args):
 
 
 def get_extracted_genes(args):
+    """extracts genes, that are significantly influencing the TAI pattern
+
+    :param args: gets args from the main cli script
+    :type args: argparse.Namespace
+    :return: Saves the identified genes, the (best) solution and run summary into files 
+    :rtype: None
+    """
     class Expression_data:
+        """class to store the expression dataset with some precomputations
+        """
 
         def quantilerank(xs):
+            """computes the quantile rank for the phylostrata
+
+            :param xs: numpy array of values
+            :type xs: np.array
+            :return: quantile ranked values
+            :rtype: np.array
+            """
             ranks = scipy.stats.rankdata(xs, method='average')
             quantile_ranks = [scipy.stats.percentileofscore(ranks, rank, kind='weak') for rank in ranks]
             return np.array(quantile_ranks)/100
 
         def __init__(self,expression_data) -> None:
+            """
+            :param expression_data: expression dataset
+            :type expression_data: pd.DataFrame
+            """
             expression_data["Phylostratum"] = Expression_data.quantilerank(expression_data["Phylostratum"])
             self.full = expression_data
             exps = expression_data.iloc[:, 2:]
@@ -149,13 +223,18 @@ def get_extracted_genes(args):
     ind_length = expression_data.full.shape[0]
 
     population_size = 150
-    #parents_ratio = 0.2
     num_generations = 8000
-    init_num_removed = 150
-    num_islands = 6
+    num_islands = 7
 
 
     def get_distance(solution):
+        """computes variance of the TAI for the particular solution
+
+        :param solution: binary encoded, which genes belong in the solution
+        :type solution: array
+        :return: variance
+        :rtype: float
+        """
         sol = np.array(solution)
         up = sol.dot(expression_data.age_weighted)
         down = sol.dot(expression_data.expressions_n)
@@ -168,6 +247,13 @@ def get_extracted_genes(args):
 
 
     def end_evaluate_individual(individual):
+        """individual fitness without the cutoff, just pure p-value
+
+        :param individual: binary encoded, which genes belong in the solution
+        :type individual: array
+        :return: fitness
+        :rtype: float
+        """
         individual = np.array(individual)
         num_not_removed = np.sum(individual)
         len_removed = ind_length - num_not_removed
@@ -178,7 +264,23 @@ def get_extracted_genes(args):
 
         
     def evaluate_individual(individual,permuts,expression_data):
+        """computes the overall fitness of an individual
+
+        :param individual: binary encoded, which genes belong in the solution
+        :type individual: array
+        :param permuts: precomputed variances from flat-line test
+        :type permuts: np.array
+        :param expression_data: dataset of expression of the genes
+        :type expression_data: pd.DataFrame
+        """
         def get_fit(res):
+            """computes empirical p-value of an individual
+
+            :param res: variance of an individual
+            :type res: np.array
+            :return: empirical p-value 
+            :rtype: float
+            """
             p = np.count_nonzero(permuts < res)/len(permuts)
             r = (res) / (max_value)
             r = r + p
@@ -195,7 +297,7 @@ def get_extracted_genes(args):
     pop,pareto_front = select.run_minimizer(expression_data.full.shape[0],evaluate_individual,1,["Variance"], 
                     eval_func_kwargs={"permuts": permuts, "expression_data": expression_data},
                     mutation_rate = mut,crossover_rate = cross, 
-                    pop_size = 150, num_gen = num_generations, num_islands = 8, mutation = "bit_flip" , 
+                    pop_size = 150, num_gen = num_generations, num_islands = num_islands, mutation = "bit_flip" , 
                     crossover =  "uniform_partialy_matched",
                     selection = "SPEA2",frac_init_not_removed = 0.005)
 
@@ -226,11 +328,16 @@ def get_extracted_genes(args):
         file.write(f'Number of genes: {len(genes)}\n')
 
 def get_fastas(args):
+    """Makes a fasta file with all the extracted genes
+
+    :param args: gets args from the main cli script
+    :type args: argparse.Namespace
+    """
     genes = np.array([line.strip() for line in open(args.genes, 'r')])
     filtered_records = []
     with open(args.fastas, "r") as fasta_file:
         for record in SeqIO.parse(fasta_file, "fasta"):
-            if record.id in genes:
+            if any(record.id.startswith(gene) for gene in genes):
                 filtered_records.append(record)
 
     with open(os.path.join(args.output,"extracted_fastas.fasta"), "w") as output_file:
