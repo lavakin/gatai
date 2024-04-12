@@ -8,8 +8,9 @@ import warnings
 import scipy
 import os
 import time
-from setminga import utils, select
+from setga import utils, select_subset
 from Bio import SeqIO
+from functools import partial
 
 def comp_vars(expression_data,rounds):
     """Computes the min-variances of a TAI patterns for permuted phylostrata
@@ -181,6 +182,66 @@ def get_extracted_genes(args):
     :return: Saves the identified genes, the (best) solution and run summary into files 
     :rtype: None
     """
+    def mutWeightedFlipBit(individual, weights, mutation_rate):
+        """Mutate the input individual by flipping the value of its attributes based on weighted probabilities for each index.
+
+        The `individual` is expected to be a sequence, and the values of the attributes shall stay valid after the `not` operator is called on them. The overall mutation rate is preserved.
+
+        :param individual: list
+            Individual to be mutated.
+        :type individual: list
+        :param weights: list
+            List of weights for each index of the individual. The higher the weight, the more probable the mutation.
+        :type weights: list
+        :param mutation_rate: float
+            Overall mutation rate for the individual.
+        :type mutation_rate: float
+
+        :returns:
+            tuple
+                A tuple containing the mutated individual.
+
+        :notes:
+            This function uses the `numpy.random.choice` function from the numpy library to select indices based on their weights and mutates them with the specified mutation rate.
+        """
+        # Calculate the number of mutations based on the mutation rate
+        num_mutations = int(len(individual) * mutation_rate)
+
+        # Select indices to mutate based on weights
+        indices_to_mutate = np.random.choice(len(individual), size=num_mutations, replace=False, p=weights)
+
+        # Mutate selected indices
+        for i in indices_to_mutate:
+            individual[i] = type(individual[i])(not individual[i])
+
+        return individual,
+
+    def cxWeightedUniform(ind1, ind2, weights,cx_rate):
+        """Executes a weighted uniform crossover that modifies in place the two
+        sequence individuals.
+
+        The attributes are swapped according to the *weights* probability.
+
+        :param ind1: The first individual participating in the crossover.
+        :type ind1: list
+        :param ind2: The second individual participating in the crossover.
+        :type ind2: list
+        :param weights: List of weights for each attribute to be exchanged.
+                        The higher the weight, the more probable the exchange.
+        :type weights: list
+        :returns: A tuple of two individuals.
+        :rtype: tuple
+
+        This function uses the :func:`numpy.random.choice` function from the numpy
+        library.
+        """
+        num_cross = int(len(ind1) * cx_rate)
+        crossover_indices = np.random.choice(len(ind2), size=num_cross, p=weights)
+        for i in crossover_indices:
+            ind1[i], ind2[i] = ind2[i], ind1[i]
+
+        return ind1, ind2
+
     class Expression_data:
         """class to store the expression dataset with some precomputations
         """
@@ -284,7 +345,7 @@ def get_extracted_genes(args):
             p = np.count_nonzero(permuts < res)/len(permuts)
             r = (res) / (max_value)
             r = r + p
-            return r if p > 0.2 else 0
+            return r if p > 0.1 else 0
         sol = np.array(individual)
         distance = np.var(np.divide(sol.dot(expression_data.age_weighted),sol.dot(expression_data.expressions_n)))
         fit = get_fit(distance)
@@ -293,12 +354,15 @@ def get_extracted_genes(args):
 
     mut  = 0.001
     cross = 0.02
+    weights = np.log(np.var(expression_data.expressions_n,axis=1) + 1)
+    mutation_part = partial(mutWeightedFlipBit,weights=weights/np.sum(weights),mutation_rate = mut)
+    crossover_part = partial(cxWeightedUniform,weights=weights/np.sum(weights),cx_rate = cross)
     tic = time.perf_counter()
-    pop,pareto_front = select.run_minimizer(expression_data.full.shape[0],evaluate_individual,1,["Variance"], 
+    pop,pareto_front = select_subset.run_minimizer(expression_data.full.shape[0],evaluate_individual,1,["Variance"], 
                     eval_func_kwargs={"permuts": permuts, "expression_data": expression_data},
                     mutation_rate = mut,crossover_rate = cross, 
-                    pop_size = 150, num_gen = num_generations, num_islands = num_islands, mutation = "bit_flip" , 
-                    crossover =  "uniform_partialy_matched",
+                    pop_size = population_size, num_gen = num_generations, num_islands = num_islands, mutation = mutation_part, 
+                    crossover =  crossover_part,
                     selection = "SPEA2",frac_init_not_removed = 0.005)
 
     toc = time.perf_counter()
@@ -315,9 +379,9 @@ def get_extracted_genes(args):
 
 
     if args.save_plot:
-        plot = utils.plot_pareto(ress,parr,args.output)
+        plot = utils.plot_pareto(ress,parr)
         plot.savefig(os.path.join(args.output, "pareto_front.png")) 
-    genes = utils.get_results(pop,ress,args.output,expression_data.full.GeneID)
+    genes = utils.get_results(pop,ress,expression_data.full.GeneID)
     np.savetxt(os.path.join(args.output,"extracted_genes.txt"),genes, fmt="%s")
 
     with open(os.path.join(args.output, "summary.txt"), 'w') as file:
