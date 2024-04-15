@@ -1,16 +1,17 @@
-from setuptools import setup
+from distutils.core import setup
 
 setup(
     name='trapga',
-    version='0.3',
     py_modules=['trapga'],
     packages = ['trapga'],
     license='MIT',   
     description = 'Library designed for extracting genes that play a significant role in development. It utilizes transcriptomic data of genes, spanning multiple developmental stages and their respective gene ages',  # Give a short description about your library
+    long_description = 'Library designed for extracting genes that play a significant role in development. It utilizes transcriptomic data of genes, spanning multiple developmental stages and their respective gene ages', 
+    project_urls = {"Documentation" :"https://trapga.readthedocs.io/en/latest/genindex.html"},
     author = 'Nikola Kalábová',              
     author_email = 'nikola@kalabova.eu',     
-    url = 'https://github.com/lavakin/trapga',  
-    download_url = 'https://github.com/lavakin/trapga/archive/refs/tags/v0.3.tar.gz',    
+    url = 'https://github.com/lavakin/trapga', 
+    version = "{{VERSION_PLACEHOLDER}}",      
     keywords = ['Genetic algorithms', 'minimal subset', 'multi-objective', "optimization"],   
     install_requires=['numpy', 'scipy', 'pandas', 'argparse', 'scikit-learn', 'tqdm',"setga"],
     entry_points={
