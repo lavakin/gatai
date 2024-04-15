@@ -1,3 +1,7 @@
+.. image:: https://readthedocs.org/projects/trapga/badge/?version=latest
+    :target: https://trapga.readthedocs.io/en/latest/?badge=latest
+    :alt: Documentation Status
+
 TraP-GA 
 =============
 
