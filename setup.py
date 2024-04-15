@@ -12,7 +12,7 @@ setup(
     url = 'https://github.com/lavakin/trapga',  
     download_url = 'https://github.com/lavakin/trapga/archive/refs/tags/v0.3.tar.gz',    
     keywords = ['Genetic algorithms', 'minimal subset', 'multi-objective', "optimization"],   
-    install_requires=['numpy', 'scipy', 'pandas', 'argparse', 'scikit-learn', 'tqdm',"setminga"],
+    install_requires=['numpy', 'scipy', 'pandas', 'argparse', 'scikit-learn', 'tqdm',"setga"],
     entry_points={
         'console_scripts': [
             'trapga = trapga.trapga:cli'
