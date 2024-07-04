@@ -11,8 +11,8 @@ setup(
     author = 'Nikola Kalábová',              
     author_email = 'nikola@kalabova.eu',     
     url = 'https://github.com/lavakin/tai_chi', 
-    #version = "{{VERSION_PLACEHOLDER}}",      
-    version = 1.1,
+    version = "{{VERSION_PLACEHOLDER}}",      
+    #version = 1.1,
     keywords = ['Genetic algorithms', 'minimal subset', 'multi-objective', "optimization"],   
     install_requires=['numpy', 'scipy', 'pandas', 'argparse', 'scikit-learn', 'tqdm',"setga"],
     entry_points={
