@@ -1,0 +1,10 @@
+README.rst
+setup.py
+tai_chi/tai_chi.py
+tai_chi/utils.py
+tai_chi.egg-info/PKG-INFO
+tai_chi.egg-info/SOURCES.txt
+tai_chi.egg-info/dependency_links.txt
+tai_chi.egg-info/entry_points.txt
+tai_chi.egg-info/requires.txt
+tai_chi.egg-info/top_level.txt
