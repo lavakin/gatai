@@ -2,13 +2,13 @@
     :target: https://trapga.readthedocs.io/en/latest/?badge=latest
     :alt: Documentation Status
 
-TraP-GA 
+TAI-Chi 
 =============
 
 Overview
 -------------------
 
-The TraP-GA is a Python library built upon SetMiG, designed for extracting genes that play a significant role in development. It utilizes transcriptomic data of genes, spanning multiple developmental stages and their respective gene ages (for more information on how to get the gene ages, see [GeneEra](https://github.com/josuebarrera/GenEra)).
+TAI-Chi  is a Python library built upon SetMiG, designed for extracting genes that play a significant role in development. It utilizes transcriptomic data of genes, spanning multiple developmental stages and their respective gene ages (for more information on how to get the gene ages, see [GeneEra](https://github.com/josuebarrera/GenEra)).
 
 The project features an algorithm designed to identify genes contributing to the observed hourglass pattern in developmental gene expression data. The hourglass pattern refers to a characteristic developmental pattern observed in various organisms, where the morphological and genetic similarities between individuals are most pronounced at a specific stage of development.
 
@@ -31,7 +31,7 @@ Installation
 
 .. code-block:: bash
 
-  git clone https://github.com/lavakin/TraP-GA
+  git clone https://github.com/lavakin/tai-chi 
 
 .. code-block:: bash
 
