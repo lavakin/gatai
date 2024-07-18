@@ -14,7 +14,7 @@ setup(
     version = "{{VERSION_PLACEHOLDER}}",      
     #version = 1.1,
     keywords = ['Genetic algorithms', 'minimal subset', 'multi-objective', "optimization"],   
-    install_requires=['numpy', 'scipy', 'pandas', 'argparse', 'scikit-learn', 'tqdm',"setga"],
+    install_requires=['numpy', 'scipy', 'pandas', 'argparse', 'scikit-learn', 'tqdm',"setga","biopython"],
     entry_points={
         'console_scripts': [
             'gatai = gatai.gatai:cli'
