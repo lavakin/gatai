@@ -17,5 +17,6 @@ Requires-Dist: argparse
 Requires-Dist: scikit-learn
 Requires-Dist: tqdm
 Requires-Dist: setga
+Requires-Dist: biopython
 
 Library designed for extracting genes that play a significant role in development. It utilizes transcriptomic data of genes, spanning multiple developmental stages and their respective gene ages

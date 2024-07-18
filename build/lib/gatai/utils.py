@@ -12,29 +12,12 @@ from setga import utils, select_subset
 from Bio import SeqIO
 from functools import partial
 from scipy.sparse import csr_matrix
+import math
 import pickle
 
-
-def comp_vars_sampled(expression_data,random_number_generator,rounds,phylostrata):
-    rows_A = rounds
-    # Generate the predefined matrix B
-    matrix_B = expression_data.expressions_n
-    # Define a generator to generate rows of matrix A
-    def generate_rows_A():
-        for _ in range(rows_A):
-            yield phylostrata[random_number_generator(expression_data.full.shape[0])]
-
-    # Initialize the result matrix
-    result = np.zeros((rows_A, expression_data.expressions_n.shape[1]))
-
-    # Generate rows of matrix A and perform matrix multiplication with matrix B
-    for i, row_A in tqdm.tqdm(enumerate(generate_rows_A())):
-        result[i] = np.dot(row_A, matrix_B)
-    return np.var(result/expression_data.expressions_n.sum(axis=0),axis=1)
         
-
 def comp_vars(expression_data,rounds):
-    """Computes the min-variances of a TAI patterns for permuted phylostrata
+    """Computes the variances of a TAI patterns for permuted phylostrata
 
     :param expression_data: expression data
     :type expression_data: pd.DataFrame
@@ -54,6 +37,15 @@ def comp_vars(expression_data,rounds):
     return np.var(avgs, axis=1)
 
 def compute_permutation_variance_sc(expression_data, rounds):
+    """Computes the variances of a TAI patterns for permuted phylostrata
+
+    :param expression_data: expression data
+    :type expression_data: pd.DataFrame
+    :param rounds: number of permutations of phylostrata
+    :type rounds: int
+    :return: variances for the TAI patterns, used to determine the empirical p-value
+    :rtype: np.array
+    """
     # Precompute the sum of expressions_n along axis 0
     expressions_n_sum = expression_data.expressions_n.sum(axis=0)
     # Ensure it's a 1D array for division later
@@ -275,7 +267,6 @@ def get_extracted_genes(args):
     if args.variances:
         permuts = np.loadtxt(args.variances)
     else:
-        #permuts = comp_vars_sampled(expression_data,phylostrata_sampler,10000,phylostrata)
         perm_start = time.perf_counter()
         if args.single_cell:
             
@@ -394,6 +385,15 @@ def get_extracted_genes(args):
     
 
     def get_skewed_reference(num_points, skew):
+        """generates reference points for NSGA3 skewed to the second objective
+
+        :param num_points: num ref points
+        :type num_points: int
+        :param skew: skewness
+        :type skew: float
+        :return: np.array of tuples of len 2
+        :rtype: np.array
+        """
         y_values = np.linspace(skew, 1, num_points+1)
         # Calculate corresponding y values such that the sum of x and y is 1
         x_values = 1 - y_values
@@ -432,7 +432,7 @@ def get_extracted_genes(args):
     eval_part = partial(evaluation_function, permuts = permuts, expression_data = expression_data)
     pop,_,gens,logbook, best_sols = select_subset.run_minimizer(expression_data.full.shape[0],eval_part,1,"Variance",
                     mutation_rate = mut,crossover_rate = cross, 
-                    pop_size = population_size, num_gen = num_generations, num_islands = num_islands, mutation = ["weighted","weighted","bit-flip","bit-flip"], 
+                    pop_size = population_size, num_gen = num_generations, num_islands = num_islands, mutation = ["weighted"] * math.ceil(num_islands/2) + ["bit-flip"] * math.floor(num_islands/2), 
                     crossover =  "uniform",
                     selection = "NSGA3",frac_init_not_removed = 0.2,ref_points = ref_points, stop_after = stop_after,weights = np.sqrt(np.var(expression_data.expressions_n,axis=1)))
 

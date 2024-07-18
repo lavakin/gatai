@@ -12,6 +12,7 @@ from setga import utils, select_subset
 from Bio import SeqIO
 from functools import partial
 from scipy.sparse import csr_matrix
+import math
 import pickle
 
         
@@ -431,7 +432,7 @@ def get_extracted_genes(args):
     eval_part = partial(evaluation_function, permuts = permuts, expression_data = expression_data)
     pop,_,gens,logbook, best_sols = select_subset.run_minimizer(expression_data.full.shape[0],eval_part,1,"Variance",
                     mutation_rate = mut,crossover_rate = cross, 
-                    pop_size = population_size, num_gen = num_generations, num_islands = num_islands, mutation = ["weighted","weighted","bit-flip","bit-flip"], 
+                    pop_size = population_size, num_gen = num_generations, num_islands = num_islands, mutation = ["weighted"] * math.ceil(num_islands/2) + ["bit-flip"] * math.floor(num_islands/2), 
                     crossover =  "uniform",
                     selection = "NSGA3",frac_init_not_removed = 0.2,ref_points = ref_points, stop_after = stop_after,weights = np.sqrt(np.var(expression_data.expressions_n,axis=1)))
 
