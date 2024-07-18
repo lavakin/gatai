@@ -1,0 +1,10 @@
+README.rst
+setup.py
+gatai/gatai.py
+gatai/utils.py
+gatai.egg-info/PKG-INFO
+gatai.egg-info/SOURCES.txt
+gatai.egg-info/dependency_links.txt
+gatai.egg-info/entry_points.txt
+gatai.egg-info/requires.txt
+gatai.egg-info/top_level.txt

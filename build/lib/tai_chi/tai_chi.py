@@ -1,5 +1,5 @@
 #!usr/bin/env python3 
-from trapga import utils as hg_utils
+from tai_chi import utils as hg_utils
 import argparse
 
 
@@ -19,6 +19,7 @@ run_minimizer_parser.add_argument("output", type=str, help="Output file path")
 run_minimizer_parser.add_argument("--variances", type=str, help="Precomputed variances file stored as numbers in one line", nargs='?')
 run_minimizer_parser.add_argument("--save_plot", action="store_true", help="Save pareto plot")
 run_minimizer_parser.add_argument("--single_cell", action="store_true", help="True if single-cell data")
+run_minimizer_parser.add_argument("--save_stats", action="store_true", help="True if stats should be saved")
 
 
 # Sub-parser for the find_coexpressed command

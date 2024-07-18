@@ -1,7 +1,6 @@
 import numpy as np
 import scipy.sparse
 import tqdm
-import matplotlib.pyplot as plt
 from sklearn.cluster import KMeans
 from collections import Counter
 import pandas as pd
@@ -13,14 +12,13 @@ from setga import utils, select_subset
 from Bio import SeqIO
 from functools import partial
 from scipy.sparse import csr_matrix
+import pickle
 
 
 def comp_vars_sampled(expression_data,random_number_generator,rounds,phylostrata):
     rows_A = rounds
-
     # Generate the predefined matrix B
     matrix_B = expression_data.expressions_n
-
     # Define a generator to generate rows of matrix A
     def generate_rows_A():
         for _ in range(rows_A):
@@ -58,7 +56,6 @@ def comp_vars(expression_data,rounds):
 def compute_permutation_variance_sc(expression_data, rounds):
     # Precompute the sum of expressions_n along axis 0
     expressions_n_sum = expression_data.expressions_n.sum(axis=0)
-
     # Ensure it's a 1D array for division later
     expressions_n_sum = np.array(expressions_n_sum).flatten()
 
@@ -85,30 +82,10 @@ def compute_permutation_variance_sc(expression_data, rounds):
     
     # Convert avgs to a numpy array for variance computation
     avgs = np.array(avgs)
+    print(avgs.shape)
     
-    # Compute and return the variance along axis 0
-    return np.var(avgs, axis=0)
-
-def comp_min_max(expression_data,rounds):
-    """Computes the min-max value of a TAI patterns for permuted phylostrata
-
-    :param expression_data: expression data
-    :type expression_data: pd.DataFrame
-    :param rounds: number of permutations of phylostrata
-    :type rounds: int
-    :return: min-max values for the TAI patterns, used to determine the empirical p-value
-    :rtype: np.array
-    """
-    avgs = []
-    phil = expression_data.full["Phylostratum"]
-    print("Running permuations")
-    for _ in tqdm.trange(rounds):
-        perm = np.random.permutation(phil)
-        weighted = expression_data.expressions.mul(perm, axis=0)
-        avg = weighted.sum(axis=0)/expression_data.expressions_n.sum(axis=0)
-        avgs.append(avg)
-    return np.max(avgs, axis=1) - np.min(avgs, axis=1)
-
+    # Compute and return the variance along axis 1
+    return np.var(avgs, axis=1)
 
 def extract_similar(args):
     """identified genes, that have similar expression patterns to the extracted ones and generates a file that includes those and the genes identified by the minimizer
@@ -228,7 +205,6 @@ def extract_coexpressed(args):
     df = pd.DataFrame(coexpressed,columns=["extracted_genes", "coexpressed"])
     df.to_csv(os.path.join(args.output,"coexpressed.tsv"),sep="\t")
 
-    # Concatenate the arrays
 
 
 def get_extracted_genes(args):
@@ -262,7 +238,6 @@ def get_extracted_genes(args):
             """
             expression_data["Phylostratum"] = Expression_data.quantilerank(expression_data["Phylostratum"])
             self.full = expression_data
-            
             exps = expression_data.iloc[:, 2:]
             #exps = exps.applymap(lambda x: np.sqrt(x))
             #exps = exps.applymap(lambda x: np.log(x + 1))
@@ -276,6 +251,7 @@ def get_extracted_genes(args):
             if args.single_cell:
                 self.expressions_n = csr_matrix(exps.to_numpy())  # Define your sparse matrix 'a'
                 self.age_weighted = csr_matrix(age_weighted)  # Define your sparse matrix 'a_w'
+            print(exps.shape)
 
 
     arr = pd.read_csv(args.input,
@@ -293,122 +269,25 @@ def get_extracted_genes(args):
         # "Removing" the selected genes from the dataset
         numerator = expression_data.weighted_sum - a_w_result
         denominator = expression_data.exp_sum - a_result
-
-        division_result = np.divide(numerator, denominator)
-
-        distance = np.var(division_result)
-
-        return distance
-    
-    def weighted_random_choice(weights):
-        """
-        Generate random numbers according to given weights without using choice function.
-
-        Args:
-            weights (list): List of weights.
-
-        Returns:
-            function: A closure that generates random numbers.
-        """
-        # Compute the cumulative distribution function (CDF)
-        cum_weights = np.cumsum(weights/np.sum(weights))
-        
-        def random_numbers(size):
-            # Generate random numbers uniformly in [0, 1)
-            random_values = np.random.rand(size)
-            
-            # Find the indices where random values fall in the CDF
-            indices = np.searchsorted(cum_weights, random_values)
-            
-            return indices  # Add 1 to convert indices to numbers starting from 1
-        
-        return random_numbers
+        return np.var(np.divide(numerator, denominator))
 
 
-    # Create a closure with fixed weights
-    generate_random_numbers = weighted_random_choice(np.log(np.var(expression_data.expressions_n_sc,axis=1) + 1))
-
-    counter = Counter(expression_data.full.Phylostratum)
-    phylostrata = np.array(list(counter.keys()))
-    phylostrata_sampler = weighted_random_choice(np.array(list(counter.values())))
-
-    
-    def mutWeightedFlipBit(individual, mutation_rate):
-        """Mutate the input individual by flipping the value of its attributes based on weighted probabilities for each index.
-
-        The `individual` is expected to be a sequence, and the values of the attributes shall stay valid after the `not` operator is called on them. The overall mutation rate is preserved.
-
-        :param individual: list
-            Individual to be mutated.
-        :type individual: list
-        :param weights: list
-            List of weights for each index of the individual. The higher the weight, the more probable the mutation.
-        :type weights: list
-        :param mutation_rate: float
-            Overall mutation rate for the individual.
-        :type mutation_rate: float
-
-        :returns:
-            tuple
-                A tuple containing the mutated individual.
-
-        :notes:
-            This function uses the `numpy.random.choice` function from the numpy library to select indices based on their weights and mutates them with the specified mutation rate.
-        """
-        # Calculate the number of mutations based on the mutation rate
-        num_mutations = int(len(individual) * mutation_rate)
-
-        # Select indices to mutate based on weights
-        indices_to_mutate = generate_random_numbers(num_mutations)
-
-        # Mutate selected indices
-        for i in indices_to_mutate:
-            individual[i] = type(individual[i])(not individual[i])
-
-        return individual,
-
-    def cxWeightedUniform(ind1, ind2,cx_rate):
-        """Executes a weighted uniform crossover that modifies in place the two
-        sequence individuals.
-
-        The attributes are swapped according to the *weights* probability.
-
-        :param ind1: The first individual participating in the crossover.
-        :type ind1: list
-        :param ind2: The second individual participating in the crossover.
-        :type ind2: list
-        :param weights: List of weights for each attribute to be exchanged.
-                        The higher the weight, the more probable the exchange.
-        :type weights: list
-        :returns: A tuple of two individuals.
-        :rtype: tuple
-
-        This function uses the :func:`numpy.random.choice` function from the numpy
-        library.
-        """
-        num_cross = int(len(ind1) * cx_rate)
-        crossover_indices = generate_random_numbers(num_cross)
-        for i in crossover_indices:
-            ind1[i], ind2[i] = ind2[i], ind1[i]
-
-        return ind1, ind2
-
-    
     if args.variances:
         permuts = np.loadtxt(args.variances)
     else:
         #permuts = comp_vars_sampled(expression_data,phylostrata_sampler,10000,phylostrata)
+        perm_start = time.perf_counter()
         if args.single_cell:
-            permuts = compute_permutation_variance_sc(expression_data,10000)
+            
+            permuts = compute_permutation_variance_sc(expression_data,1000)
+            
         else:
             permuts = comp_vars(expression_data,100000)
-
+        perm_stop = time.perf_counter()
+    
 
     ind_length = expression_data.full.shape[0]
 
-    population_size = 120
-    num_generations = 12000
-    num_islands = 5
 
 
     def get_distance(solution):
@@ -479,7 +358,7 @@ def get_extracted_genes(args):
         distance = np.var(np.divide(sol.dot(expression_data.age_weighted),sol.dot(expression_data.expressions_n)))
         fit = get_fit(distance)
         # Return the fitness values as a tuple
-        return [fit]
+        return fit
     
 
     def evaluate_individual_sc(individual,permuts,expression_data):
@@ -515,64 +394,77 @@ def get_extracted_genes(args):
     
 
     def get_skewed_reference(num_points, skew):
-        y_values = np.linspace(skew, 1, num_points)
+        y_values = np.linspace(skew, 1, num_points+1)
+        # Calculate corresponding y values such that the sum of x and y is 1
+        x_values = 1 - y_values
+
+        # Create the numpy array with two columns
+        return np.column_stack((x_values, y_values))[:-1]
+    
+    def get_uniform_reference(num_points):
+        y_values = np.linspace(0, 1, num_points)
         # Calculate corresponding y values such that the sum of x and y is 1
         x_values = 1 - y_values
 
         # Create the numpy array with two columns
         return np.column_stack((x_values, y_values))
 
+    ref_points = get_uniform_reference(10)
+    ref_points = np.append(ref_points,get_skewed_reference(4,0.75)[:-1],axis=0)
 
-    ref_points = get_skewed_reference(5,0)
-    ref_points = np.append(ref_points,get_skewed_reference(3,0.6),axis=0)
-    ref_points = np.append(ref_points,get_skewed_reference(3,0.82),axis=0)
-    ref_points = np.append(ref_points,get_skewed_reference(2,0.95),axis=0)
-
-    mut  = 0.002
+    population_size = 150
+    num_generations = 15000
+    num_islands = 4
+    if args.single_cell:
+        population_size = 80
+        num_islands = 3
+    mut  = 0.005
     cross = 0.02
+    stop_after = 200
+    if args.single_cell:
+        stop_after = 40
 
-
-    mutation_part = partial(mutWeightedFlipBit,mutation_rate = mut)
-    crossover_part = partial(cxWeightedUniform,cx_rate = cross)
     tic = time.perf_counter()
     if args.single_cell:
         evaluation_function = evaluate_individual_sc
     else:
         evaluation_function = evaluate_individual
-    pop,pareto_front,best_sols = select_subset.run_minimizer(expression_data.full.shape[0],evaluation_function,1,["Variance"], 
-                    eval_func_kwargs={"permuts": permuts, "expression_data": expression_data},
+    eval_part = partial(evaluation_function, permuts = permuts, expression_data = expression_data)
+    pop,_,gens,logbook, best_sols = select_subset.run_minimizer(expression_data.full.shape[0],eval_part,1,"Variance",
                     mutation_rate = mut,crossover_rate = cross, 
-                    pop_size = population_size, num_gen = num_generations, num_islands = num_islands, mutation = mutation_part, 
-                    crossover =  crossover_part,
-                    selection = "NSGA3",frac_init_not_removed = 0.2,ref_points = ref_points,single_cell=args.single_cell)
+                    pop_size = population_size, num_gen = num_generations, num_islands = num_islands, mutation = "bit-flip_old", 
+                    crossover =  "uniform_old",
+                    selection = "NSGA3",frac_init_not_removed = 0.2,ref_points = ref_points, stop_after = stop_after,weights = np.sqrt(np.var(expression_data.expressions_n,axis=1)))
 
-
-    #np.savetxt(os.path.join(args.output,"best_sols.csv"), best_sols, delimiter="\t")
     toc = time.perf_counter()
     if not os.path.exists(args.output):
         os.makedirs(args.output)
-    np.savetxt(os.path.join(args.output,"complete.csv"), np.array(pop), delimiter="\t")
+
     ress = np.array([end_evaluate_individual(x) for x in pop])
-
+    min_ex = min(pop, key=lambda ind: ind.fitness.values[1]).fitness.values[0]
     pop = np.array(pop)
-    par = np.array([list(x) for x in pareto_front[0]])
-    parr = np.array([end_evaluate_individual(x) for x in par])
-
-    np.savetxt(os.path.join(args.output,"pareto.csv"), par, delimiter="\t")
-
-
-    if args.save_plot:
-        plot = utils.plot_pareto(ress,parr)
-        plot.savefig(os.path.join(args.output, "pareto_front.png")) 
     genes = utils.get_results(pop,ress,expression_data.full.GeneID)
     np.savetxt(os.path.join(args.output,"extracted_genes.txt"),genes, fmt="%s")
 
-    with open(os.path.join(args.output, "summary.txt"), 'w') as file:
-        # Write the first line
-        file.write(f'Time: {toc - tic:0.4f} seconds\n')
-        
-        # Write the second line
-        file.write(f'Number of genes: {len(genes)}\n')
+    if args.save_stats:
+        np.savetxt(os.path.join(args.output,"permuts.txt"),permuts)
+        with open(os.path.join(args.output, "summary.txt"), 'w') as file:
+            # Write the first line
+            file.write(f'Time: {toc - tic:0.4f} seconds\n')
+            file.write(f'Permutation Time: {perm_stop - perm_start:0.4f} seconds\n')
+            # Write the second line
+            file.write(f'Min. genes in sol: {min_ex}\n')
+            file.write(f'Number of genes: {len(genes)}\n')
+            file.write(f'Number of generations: {gens}\n')
+            np.savetxt(os.path.join(args.output,"best_sols.csv"), best_sols, delimiter="\t")
+            np.savetxt(os.path.join(args.output,"complete.csv"), np.array(pop), delimiter="\t")
+
+            with open(os.path.join(args.output, "logbook.pickle"), 'wb') as file:
+                pickle.dump(logbook, file)
+
+
+
+
 
     
 

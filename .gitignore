@@ -1,7 +1,9 @@
 __pycache__
 .vscode
 .DS_Store
-results
+results_all
 example_data/Tables
 example_data/Organs
+scripts
+0.fasta
 

@@ -1,0 +1,21 @@
+Metadata-Version: 2.1
+Name: gatai
+Version: 1.1
+Summary: Library designed for extracting genes that play a significant role in development. It utilizes transcriptomic data of genes, spanning multiple developmental stages and their respective gene ages
+Home-page: https://github.com/lavakin/gatai
+Author: Nikola Kalábová
+Author-email: nikola@kalabova.eu
+License: MIT
+Project-URL: Documentation, https://trapga.readthedocs.io/en/latest/genindex.html
+Keywords: Genetic algorithms,minimal subset,multi-objective,optimization
+Classifier: Development Status :: 3 - Alpha
+Classifier: License :: OSI Approved :: MIT License
+Requires-Dist: numpy
+Requires-Dist: scipy
+Requires-Dist: pandas
+Requires-Dist: argparse
+Requires-Dist: scikit-learn
+Requires-Dist: tqdm
+Requires-Dist: setga
+
+Library designed for extracting genes that play a significant role in development. It utilizes transcriptomic data of genes, spanning multiple developmental stages and their respective gene ages

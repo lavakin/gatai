@@ -1,0 +1,9 @@
+Stage	Abb	Brassica rapa	Brassica oleracea	Brassica nigra	Brassica napus	Brassica juncea	Brassica carinata
+Unfertilized Ovule	UO	0	0	0	0	0	0
+Zygote Embryo	E1	40	44	44	44	40	44
+Quadrant Embryo	E2	96	102	102	102	96	102
+Globular Embryo	E3	420	480	480	480	420	480
+Heart Embryo	E4	540	660	660	600	540	600
+Torpedo Embryo	E5	660	900	840	780	660	780
+Bent Embryo	E6	960	1260	1140	1140	1020	1140
+Mature Embryo	E7	1440	1800	1680	1620	1440	1680
